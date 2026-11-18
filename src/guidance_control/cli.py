@@ -8,6 +8,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 
+from .experiments import run_robustness_sweeps
 from .metrics import tracking_metrics
 from .simulation import BoatConfig, DroneConfig, simulate_boat, simulate_drone
 
@@ -17,6 +18,25 @@ def _write_csv(path: Path, headers: list[str], columns: list[list[float]]) -> No
         writer = csv.writer(stream)
         writer.writerow(headers)
         writer.writerows(zip(*columns))
+
+
+def _write_dict_rows(path: Path, rows: list[dict[str, float | None]]) -> None:
+    if not rows:
+        raise ValueError("cannot write an empty experiment result")
+    with path.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def write_sensitivity_outputs(output_dir: str | Path = "results") -> dict[str, list[dict[str, float | None]]]:
+    """Run the fixed sensitivity grids and export their rows as CSV."""
+    output = Path(output_dir)
+    output.mkdir(parents=True, exist_ok=True)
+    results = run_robustness_sweeps()
+    _write_dict_rows(output / "drone_disturbance_sweep.csv", results["drone_disturbance_sweep"])
+    _write_dict_rows(output / "boat_current_sweep.csv", results["boat_current_sweep"])
+    return results
 
 
 def run_experiments(output_dir: str | Path = "results") -> dict[str, dict[str, float | None]]:
@@ -78,9 +98,12 @@ def run_experiments(output_dir: str | Path = "results") -> dict[str, dict[str, f
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run baseline drone and boat guidance simulations.")
     parser.add_argument("--output-dir", default="results", help="Directory for CSV, JSON and PNG outputs.")
+    parser.add_argument("--sensitivity", action="store_true", help="Also export disturbance and current sensitivity sweeps.")
     args = parser.parse_args()
     summary = run_experiments(args.output_dir)
     print(json.dumps(summary, indent=2))
+    if args.sensitivity:
+        print(json.dumps(write_sensitivity_outputs(args.output_dir), indent=2))
 
 
 if __name__ == "__main__":
