@@ -36,6 +36,17 @@ environmental constraints. The constant-speed assumption is deliberately
 simple. Results are simulation outputs, not evidence of autonomous maritime
 operation.
 
+## Sensitivity experiments
+
+The optional CLI sensitivity mode varies one factor at a time: drone downward
+wind force over a fixed five-point grid, and boat current magnitude by scaling
+the configured x/y current vector. It records altitude or cross-track RMSE,
+maximum absolute error, a sustained-entry settling-time estimate and (for the
+drone) the fraction of samples at thrust limits. The grid is deterministic and
+scenario-based; it is not a probability distribution, Monte Carlo study or
+controller-tuning result. Conclusions apply only to the selected model and
+parameter values.
+
 ## Numerical and evaluation choices
 
 Both models use a fixed time step and semi-implicit Euler integration. The
