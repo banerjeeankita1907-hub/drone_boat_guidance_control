@@ -27,6 +27,7 @@ source .venv/bin/activate       # Windows: .venv\Scripts\activate
 python -m pip install -e ".[dev]"
 python -m pytest
 guidance-control --output-dir results
+guidance-control --output-dir results --sensitivity
 ```
 
 The experiment runner writes:
@@ -36,6 +37,9 @@ The experiment runner writes:
   cross-track error.
 - `results/metrics.json` – RMSE, MAE, maximum absolute error, overshoot and
   sustained-entry settling-time estimates.
+- With `--sensitivity`, `drone_disturbance_sweep.csv` and
+  `boat_current_sweep.csv` – deterministic one-factor-at-a-time robustness
+  sweeps over disturbance strength and current magnitude.
 - `results/drone_altitude_response.png` and
   `results/boat_path_tracking.png` – generated figures.
 
@@ -79,6 +83,14 @@ Model equations, assumptions and omissions are documented in
 Open `drone_boat_guidance_control.ipynb` in Jupyter or Google Colab to use the
 original sliders, response plots and animations. The new package is designed
 to make baseline experiments repeatable outside the notebook.
+
+## Sensitivity experiments
+
+The optional sensitivity mode evaluates five fixed downward-wind loads for the
+drone and five scales of the baseline two-axis current for the boat. It reports
+tracking errors, settling-time estimates and actuator saturation fractions.
+These are deterministic scenario sweeps, not Monte Carlo uncertainty bounds,
+parameter optimization or proof of robustness outside the selected grid.
 
 ## Reproducibility and quality checks
 
